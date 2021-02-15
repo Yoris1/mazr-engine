@@ -139,15 +139,15 @@ void loop(float dTime, float time) {
 	}
 	SDL_SetRenderTarget(renderer, texture);
 
-	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0xff, 0xff);
 	SDL_RenderClear(renderer);
 	
-	SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0xff, 0xff);
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0x0f, 0xff);
 	pixel_row_rect.w = WINDOW_WIDTH;
 	pixel_row_rect.x = 0;
 	pixel_row_rect.y = WINDOW_HEIGHT/2;
 	pixel_row_rect.h = WINDOW_HEIGHT;
-	SDL_RenderDrawRect(renderer, &pixel_row_rect);
+	SDL_RenderFillRect(renderer, &pixel_row_rect);
 	vec2d d;
 	vec2d xOffset;
 	xOffset.x = 0.5f;
