@@ -10,9 +10,9 @@
                 "-lSDL2",
                 "-lm",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
+                "${fileDirname}/${fileBasenameNoExtension}.o",
                 "vectors.c",
-                "raycaster.c"
+                "raycaster.c",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
