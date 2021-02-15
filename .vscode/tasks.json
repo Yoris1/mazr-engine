@@ -11,7 +11,8 @@
                 "-lm",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "vectors.c"
+                "vectors.c",
+                "raycaster.c"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

@@ -1,10 +1,14 @@
+#pragma once
 #include <SDL2/SDL.h>
 // sdl manager lib
 SDL_Renderer *SDLM_renderer;
 SDL_Texture *SDLM_texture;
 SDL_Event SDLM_event;
 SDL_Window *SDLM_window;
-
+// add input keyboard manager, where at the start you can register which keys to track
+// and then you can check when the key is unpressed or pressed or is down, kinda like unity 
+void loop(float dTime, float time, SDL_Event* event); 
+// declaration for signature of the game loop to be used with sdlm
 
 int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {

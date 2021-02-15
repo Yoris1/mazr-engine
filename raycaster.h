@@ -1,5 +1,6 @@
 #pragma once
 #include "vectors.h"
+#define RENDER_DIST 50
 
 typedef struct ray {
         vec2d origin;
@@ -7,3 +8,4 @@ typedef struct ray {
         float dist;
 } Ray;
 
+int castRay(Ray* ray);
