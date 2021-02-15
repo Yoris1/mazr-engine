@@ -1,73 +1,26 @@
-#include <SDL2/SDL.h>
 #include <math.h>
 #include "vectors.h"
 #include "raycaster.h"
+#include "sdlm.h"
+
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 #define FOV 90
 
-SDL_Renderer *renderer;
-SDL_Texture *texture;
-SDL_Event event;
 SDL_Rect pixel_row_rect;
 Ray ray;
 vec2d pos;
 
-void loop(float dTime, float time);
+void loop(float dTime, float time, SDL_Event* event);
 int main(int argc, char *argv[])
 {
-	SDL_Window *window;
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
-		return 3;
-	}
-
-	window = SDL_CreateWindow("M-A-Z-R",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
-		WINDOW_WIDTH, WINDOW_HEIGHT,
-		SDL_WINDOW_BORDERLESS);
-	if(window == NULL) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create a window: %s", SDL_GetError());
-	}
-
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	
-	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	float timerResolution = SDL_GetPerformanceFrequency();
-	float lastFrameTime = SDL_GetPerformanceCounter();
-	float frameTime = 0;
-	float deltaTime = 0;
-
-
 	pos.x = 0;
 	pos.y = 0;
-
-	while (1) {
-
-		SDL_PollEvent(&event);
-		if(event.type == SDL_QUIT)
-			break;
-		
-		loop(deltaTime, lastFrameTime/timerResolution);
-
-		SDL_SetRenderTarget(renderer, NULL);
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
-		SDL_RenderPresent(renderer);
-
-		float time = SDL_GetPerformanceCounter();
-		frameTime = time - lastFrameTime;
-		lastFrameTime = time;
-		deltaTime = frameTime / timerResolution;
-	}
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyTexture(texture);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
+		return 0;	
+	SDLM_initGameLoop(&loop);
+	SDLM_destroy();
 	return 0;
 }
 #define RENDER_DIST 50
@@ -125,29 +78,29 @@ int castRay(Ray *ray) {
 	}
 	return 0;
 }
-void loop(float dTime, float time) {
+void loop(float dTime, float time, SDL_Event* event) {
 
-	if(event.type == SDL_KEYDOWN) {
-		if(event.key.keysym.sym == SDLK_UP)
+	if(event->type == SDL_KEYDOWN) {
+		if(event->key.keysym.sym == SDLK_UP)
 			pos.y += 10*dTime;
-		else if(event.key.keysym.sym == SDLK_DOWN)
+		else if(event->key.keysym.sym == SDLK_DOWN)
 			pos.y -= 10*dTime;
-		if(event.key.keysym.sym == SDLK_RIGHT)
+		if(event->key.keysym.sym == SDLK_RIGHT)
 			pos.x += 10*dTime;
-		else if(event.key.keysym.sym == SDLK_LEFT)
+		else if(event->key.keysym.sym == SDLK_LEFT)
 			pos.x -= 10*dTime;
 	}
-	SDL_SetRenderTarget(renderer, texture);
+	SDL_SetRenderTarget(SDLM_renderer, SDLM_texture);
 
-	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0xff, 0xff);
-	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0xff, 0xff);
+	SDL_RenderClear(SDLM_renderer);
 	
-	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0x0f, 0xff);
+	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0x0f, 0xff);
 	pixel_row_rect.w = WINDOW_WIDTH;
 	pixel_row_rect.x = 0;
 	pixel_row_rect.y = WINDOW_HEIGHT/2;
 	pixel_row_rect.h = WINDOW_HEIGHT;
-	SDL_RenderFillRect(renderer, &pixel_row_rect);
+	SDL_RenderFillRect(SDLM_renderer, &pixel_row_rect);
 	vec2d d;
 	vec2d xOffset;
 	xOffset.x = 0.5f;
@@ -168,10 +121,10 @@ void loop(float dTime, float time) {
 			if(castRay(&ray)) {
 				float brightness = ray.dist*0xff/RENDER_DIST;
 				brightness = 1 - brightness;
-				SDL_SetRenderDrawColor(renderer, brightness, brightness, brightness, 0xff);
+				SDL_SetRenderDrawColor(SDLM_renderer, brightness, brightness, brightness, 0xff);
 				pixel_row_rect.h = pow(1-(ray.dist/RENDER_DIST), 2)*WINDOW_HEIGHT*0.5f; 
 				pixel_row_rect.y = WINDOW_HEIGHT / 2 - pixel_row_rect.h / 2;
-				SDL_RenderDrawRect(renderer, &pixel_row_rect);
+				SDL_RenderDrawRect(SDLM_renderer, &pixel_row_rect);
 			}
 	}
 }
