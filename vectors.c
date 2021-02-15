@@ -23,6 +23,10 @@ void sub(vec2d* a, vec2d* b) {
     a->x -= b->x;
     a->y -= b->y;
 }
+void subF(vec2d* a, float b) {
+    a->x -= b;
+    a->y -= b;
+}
 void mul(vec2d* a, vec2d* b) {
     a->x *= b->x;
     a->y *= b->y;

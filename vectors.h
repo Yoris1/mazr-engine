@@ -13,5 +13,6 @@ float magnitudeSq(vec2d* a);
 void normalize(vec2d* a);
 void add(vec2d* a, vec2d* b);
 void sub(vec2d* a, vec2d* b);
+void subF(vec2d* a, float b);
 void mul(vec2d* a, vec2d* b);
 void mulF(vec2d* a, float c);
