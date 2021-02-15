@@ -18,13 +18,11 @@ int main(int argc, char *argv[])
 	pos.y = 0;
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
-	SDLM_initGameLoop(&loop);
+	SDLM_initGameLoop(&loop, &render);
 	SDLM_destroy();
 	return 0;
 }
-
 void loop(float dTime, float time, SDL_Event* event) {
-
 	if(event->type == SDL_KEYDOWN) {
 		if(event->key.keysym.sym == SDLK_UP)
 			pos.y += 10*dTime;
@@ -35,7 +33,9 @@ void loop(float dTime, float time, SDL_Event* event) {
 		else if(event->key.keysym.sym == SDLK_LEFT)
 			pos.x -= 10*dTime;
 	}
+}
 
+void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_SetRenderTarget(SDLM_renderer, SDLM_texture);
 
 	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0xff, 0xff);
@@ -59,9 +59,9 @@ void loop(float dTime, float time, SDL_Event* event) {
 		pixel_row_rect.x = row;
 		
 		d.x = (float)row/WINDOW_WIDTH;
-		d.y = 1; // 0.1f in front of camera
+		d.y = 1;
 		sub(&d, &xOffset); // -0.5 to 0.5 to camera
-		normalize(&d); // d is a directional vector, so must be normalized.
+		normalize(&d);
 
 		ray.origin = pos;
 		ray.direction = d;

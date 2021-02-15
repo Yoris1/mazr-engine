@@ -7,8 +7,10 @@ SDL_Event SDLM_event;
 SDL_Window *SDLM_window;
 // add input keyboard manager, where at the start you can register which keys to track
 // and then you can check when the key is unpressed or pressed or is down, kinda like unity 
+
 void loop(float dTime, float time, SDL_Event* event); 
-// declaration for signature of the game loop to be used with sdlm
+void render(SDL_Texture *texture, SDL_Renderer *renderer);
+// declarations for signatures of the game and render loop to be used with sdlm
 
 int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -42,7 +44,7 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
     return 0;
 }
 
-int SDLM_initGameLoop(void (*loop)(float dTime, float time, SDL_Event* event)) {
+int SDLM_initGameLoop(void (*loop)(float dTime, float time, SDL_Event* event), void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
     float timerResolution = SDL_GetPerformanceFrequency();
 	float lastFrameTime = SDL_GetPerformanceCounter();
 	float frameTime = 0;
@@ -52,6 +54,7 @@ int SDLM_initGameLoop(void (*loop)(float dTime, float time, SDL_Event* event)) {
         if(SDLM_event.type == SDL_QUIT)
             return 0; // exiting on user request
 
+        renderLoop(SDLM_texture, SDLM_renderer);
         loop(deltaTime, lastFrameTime/timerResolution, &SDLM_event);
 
         SDL_SetRenderTarget(SDLM_renderer, NULL);
