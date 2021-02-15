@@ -40,3 +40,24 @@ void normalize(vec2d* a) {
     a->x /= mag;
     a->y /= mag;
 }
+
+mat2x2 getRotationMatrix(float degrees) {
+    mat2x2 mat;
+    vec2d i;
+    vec2d j;
+    float radians = degrees * M_PI/180;
+    i.x = cos(radians);
+    i.y = sin(radians);
+    j.x = -sin(radians);
+    j.y = cos(radians);
+    mat.i = i;
+    mat.j = j;
+    return mat;
+}
+
+void mulMat2x2(vec2d* a, mat2x2* m) {
+    float nx = a->x * m->i.x + a->y * m->j.x;
+    float ny = a->x * m->i.y + a->y * m->j.y;
+    a->x = nx;
+    a->y = ny;
+}

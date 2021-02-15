@@ -1,30 +1,56 @@
 #include "raycaster.h"
 #include <math.h>
 
-vec2d cubePositions[3];
-float cubeSizes[3] = {2, 1.5, 0.5};
-float getDist(vec2d* p) {
-	cubePositions[0].x = 0;
-	cubePositions[0].y = 15;
-	
-	cubePositions[1].x = 3;
-	cubePositions[1].y = 20;
-	
-	cubePositions[2].x = -1;
-	cubePositions[2].y = 10;
-	float minDist = RENDER_DIST;
-	for(int i = 0; i < 3; i++) {
-		float a, b, d;
+char map[10][10] = {
+    {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
+    {1, 0, 1, 0, 0, 1, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+    {2, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {2, 0, 0, 0, 0, 0, 0, 0, 2, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 2, 2, 2, 1, 1, 1, 1}
+};
+#define TILE_SIZE 0.51f
+// make this slightly bigger so i wouldn't get the lines in the middle between blocks
 
-		a = sqrt(pow(p->x - cubePositions[i].x, 2))-cubeSizes[i];
-		b = sqrt(pow(p->y - cubePositions[i].y, 2))-cubeSizes[i];
-		d = a>b? a:b;
-		//float d = dist(p, &cubePositions[i])-1;
-		// this equation is actually for a cylinder oops.
-		if(minDist > d)
-			minDist = d;
-	}
-	
+float getDist(vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
+	float minDist = RENDER_DIST;
+    vec2d pos;
+    for(int x = 0; x < 10; x++) 
+    {
+        for(int y = 0; y < 10; y++) {
+            if(map[x][y] == 0) continue;
+            pos.x = x;
+            pos.y = y;
+            float a, b, d;
+
+            a = sqrt(pow(p->x - pos.x, 2))-TILE_SIZE;
+            b = sqrt(pow(p->y - pos.y, 2))-TILE_SIZE;
+            char tempHitAxis;
+            if(a > b) {
+                d = a;
+                tempHitAxis = 0;
+            }
+            else {
+                d = b;
+                tempHitAxis = 1;
+            }
+
+            if(minDist > d) {
+                 minDist = d;
+                *hitAxis = tempHitAxis;
+                if(tempHitAxis)
+                    *xHitPoint = (p->x-pos.x+TILE_SIZE)/TILE_SIZE/2;
+                else
+                    *xHitPoint = (p->y-pos.y+TILE_SIZE)/TILE_SIZE/2;
+                // xHitPoint is 0 to 1 depending on how far along the surface it is.
+                *textureId = map[x][y];
+            }
+        }
+    }
 
 	return minDist;
 }
@@ -47,10 +73,12 @@ int castRay(Ray *ray) {
 		mulF(&dir, ray->dist);
 		add(&point, &dir);
 
-		float d = getDist(&point);
+		float d = getDist(&point, &(ray->hitAxis), &(ray->hitTextureX), &(ray->textureId));
+
 		if(d < HIT_DIST)
 			return 1;
+
 		ray->dist += d*0.9f;
-	}
+	}   
 	return 0;
 }
