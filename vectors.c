@@ -61,3 +61,14 @@ void mulMat2x2(vec2d* a, mat2x2* m) {
     a->x = nx;
     a->y = ny;
 }
+
+mat2x2 inverse(mat2x2* mat) {
+    mat2x2 inverse;
+    float det = (mat->i.x * mat->j.y - mat->i.y * mat-> j.x);
+
+    inverse.i.x = mat->j.y * (1.0/det);
+    inverse.j.y = mat->i.x * (1.0/det);
+
+    inverse.i.y = -mat->i.y * (1.0/det);
+    inverse.j.x = -mat->j.x * (1.0/det);
+}

@@ -10,6 +10,7 @@ typedef struct mat2x2 {
 } mat2x2;
 
 mat2x2 getRotationMatrix(float angle);
+mat2x2 inverse(mat2x2* mat);
 
 float dist(vec2d* a, vec2d* b);
 float distSq(vec2d* a, vec2d* b);
