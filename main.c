@@ -39,20 +39,35 @@ int main(int argc, char *argv[])
 }
 float rot = 0;
 mat2x2 rotationMatrix;
+float fovTest = 0.5f;
 void loop(float dTime, float time) {
-	if(keyboardState[SDL_SCANCODE_UP])
-		pos.y += 10*dTime;
-	else if(keyboardState[SDL_SCANCODE_DOWN])
-		pos.y -= 10*dTime;
-	if(keyboardState[SDL_SCANCODE_RIGHT])
-		pos.x += 10*dTime;
-	else if(keyboardState[SDL_SCANCODE_LEFT])
-		pos.x -= 10*dTime;
 	if(keyboardState[SDL_SCANCODE_A])
 		rot += 40*dTime;
 	else if(keyboardState[SDL_SCANCODE_D])
 		rot -= 40*dTime;
 	rotationMatrix = getRotationMatrix(rot);
+
+	vec2d movDir;
+	movDir.x = 0;
+	movDir.y = 0;
+	
+	if(keyboardState[SDL_SCANCODE_UP])
+		movDir.y =+ 10*dTime;
+	else if(keyboardState[SDL_SCANCODE_DOWN])
+		movDir.y =- 10*dTime;
+	if(keyboardState[SDL_SCANCODE_RIGHT])
+		movDir.x =+ 10*dTime;
+	else if(keyboardState[SDL_SCANCODE_LEFT])
+		movDir.x =- 10*dTime;
+	
+	mulMat2x2(&movDir, &rotationMatrix);
+	pos.x += movDir.x;
+	pos.y += movDir.y;
+
+	if(keyboardState[SDL_SCANCODE_S])
+		fovTest += 10*dTime;
+	else if(keyboardState[SDL_SCANCODE_W])
+		fovTest -= 10*dTime;
 }
 void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_SetRenderTarget(SDLM_renderer, SDLM_texture);
@@ -79,7 +94,7 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 		
 		float aspectRatioX = WINDOW_WIDTH/WINDOW_HEIGHT;
 		d.x = (float)row/WINDOW_WIDTH;
-		d.y = 2;
+		d.y = 2.f;
 
 		sub(&d, &xOffset); // -0.5 to 0.5 to camera
 		d.x *= aspectRatioX;
