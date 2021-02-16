@@ -15,11 +15,19 @@ SDL_Rect texture_sample_rect;
 Ray ray;
 vec2d pos;
 
+float fov = 0;
+float fov_deg = 107;
+void updateFOV() {
+	fov = atan(M_PI/180*(fov_deg/2))*2;
+}
+
 SDL_Surface* walls_surface;
 SDL_Texture* walls_texture;
 const Uint8* keyboardState;
+
 int main(int argc, char *argv[])
 {
+	updateFOV();
 	keyboardState = SDL_GetKeyboardState(NULL);
 
 	pos.x = 5;
@@ -37,9 +45,9 @@ int main(int argc, char *argv[])
 	SDLM_destroy();
 	return 0;
 }
+
 float rot = 0;
 mat2x2 rotationMatrix;
-float fovTest = 1.15f;
 void loop(float dTime, float time) {
 	if(keyboardState[SDL_SCANCODE_A])
 		rot += 180*dTime;
@@ -65,11 +73,16 @@ void loop(float dTime, float time) {
 	pos.x += movDir.x;
 	pos.y += movDir.y;
 
-	if(keyboardState[SDL_SCANCODE_S])
-		fovTest += 10*dTime;
-	else if(keyboardState[SDL_SCANCODE_W])
-		fovTest -= 10*dTime;
+	if(keyboardState[SDL_SCANCODE_S]) {
+		fov_deg += 50*dTime;
+		updateFOV();
+	}
+	else if(keyboardState[SDL_SCANCODE_W]) {
+		fov_deg -= 50*dTime;
+		updateFOV();
+	}
 }
+
 void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
 	
@@ -81,6 +94,7 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0x0f, 0xff);
 	pixel_row_rect.w = WINDOW_WIDTH;
 	pixel_row_rect.x = 0;
+
 	pixel_row_rect.y = WINDOW_HEIGHT/2;
 	pixel_row_rect.h = WINDOW_HEIGHT;
 	SDL_RenderFillRect(SDLM_renderer, &pixel_row_rect);
@@ -96,7 +110,8 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 		d.x -= 0.5f;
 		d.y = 1.0f;
 		d.x *= WINDOW_WIDTH/WINDOW_HEIGHT;
-		d.x *= fovTest;
+		
+		d.x *= fov;
 
 		normalize(&d);
 		mulMat2x2(&d, &rotationMatrix);
