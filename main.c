@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 }
 float rot = 0;
 mat2x2 rotationMatrix;
-float fovTest = 0.5f;
+float fovTest = 1.15f;
 void loop(float dTime, float time) {
 	if(keyboardState[SDL_SCANCODE_A])
 		rot += 180*dTime;
@@ -106,7 +106,8 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 		ray.dist = 0;
 		ray.hitAxis = 0;
 		if(castRay(&ray)) {
-			pixel_row_rect.h = pow(1-(ray.dist/RENDER_DIST), 2)*WINDOW_HEIGHT; 
+			pixel_row_rect.h = WINDOW_HEIGHT/ray.dist;
+
 			pixel_row_rect.y = WINDOW_HEIGHT / 2 - pixel_row_rect.h / 2;
 			texture_sample_rect.x = floor(ray.hitTextureX*TEXTURE_WIDTH+TEXTURE_WIDTH*(ray.textureId-1));
 			SDL_RenderCopy(renderer, walls_texture, &texture_sample_rect, &pixel_row_rect);
