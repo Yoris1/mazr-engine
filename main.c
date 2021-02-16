@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
 	walls_surface = SDL_LoadBMP("textures/walls.bmp");
-	walls_texture = SDL_CreateTextureFromSurface(SDLM_renderer, walls_surface);
+	walls_texture = SDL_CreateTextureFromSurface(_SDLM_renderer, walls_surface);
 	
 	texture_sample_rect.w = 1;
 	texture_sample_rect.h = TEXTURE_HEIGHT;
@@ -86,18 +86,18 @@ void loop(float dTime, float time) {
 void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
 	
-	SDL_SetRenderTarget(SDLM_renderer, SDLM_texture);
+	SDL_SetRenderTarget(renderer, _SDLM_texture);
 
-	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0xff, 0xff);
-	SDL_RenderClear(SDLM_renderer);
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0xff, 0xff);
+	SDL_RenderClear(renderer);
 	
-	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0x0f, 0xff);
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0x0f, 0xff);
 	pixel_row_rect.w = WINDOW_WIDTH;
 	pixel_row_rect.x = 0;
 
 	pixel_row_rect.y = WINDOW_HEIGHT/2;
 	pixel_row_rect.h = WINDOW_HEIGHT;
-	SDL_RenderFillRect(SDLM_renderer, &pixel_row_rect);
+	SDL_RenderFillRect(renderer, &pixel_row_rect);
 
 	
 	vec2d d;
@@ -130,8 +130,8 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 
 			// SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0x0f);
 			if(ray.hitAxis){
-				SDL_SetRenderDrawColor(SDLM_renderer, 70, 70, 70, 0x70);
-				SDL_RenderDrawRect(SDLM_renderer, &pixel_row_rect);
+				SDL_SetRenderDrawColor(renderer, 70, 70, 70, 0x70);
+				SDL_RenderDrawRect(renderer, &pixel_row_rect);
 			}
 		}
 	}
