@@ -5,12 +5,10 @@ SDL_Renderer *SDLM_renderer;
 SDL_Texture *SDLM_texture;
 SDL_Event SDLM_event;
 SDL_Window *SDLM_window;
-// add input keyboard manager, where at the start you can register which keys to track
-// and then you can check when the key is unpressed or pressed or is down, kinda like unity 
 
-void loop(float dTime, float time, SDL_Event* event); 
-void render(SDL_Texture *texture, SDL_Renderer *renderer);
 // declarations for signatures of the game and render loop to be used with sdlm
+void loop(float dTime, float time); 
+void render(SDL_Texture *texture, SDL_Renderer *renderer);
 
 int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -44,28 +42,30 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
     return 0;
 }
 
-int SDLM_initGameLoop(void (*loop)(float dTime, float time, SDL_Event* event), void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
-    float timerResolution = SDL_GetPerformanceFrequency();
-	float lastFrameTime = SDL_GetPerformanceCounter();
-	float frameTime = 0;
-	float deltaTime = 0;
-    while(1) {
-        SDL_PollEvent(&SDLM_event);
-        if(SDLM_event.type == SDL_QUIT)
-            return 0; // exiting on user request
+int SDLM_initGameLoop(void (*loop)(float dTime, float time), 
+    void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
+        float timerResolution = SDL_GetPerformanceFrequency();
+        float lastFrameTime = SDL_GetPerformanceCounter();
+        float frameTime = 0;
+        float deltaTime = 0;
+        while(1) {
+            while(SDL_PollEvent(&SDLM_event))
+            // only poll for quit event, don't care about the rest for now
+                if(SDLM_event.type == SDL_QUIT)
+                    return 0; // exiting on user request
 
-        renderLoop(SDLM_texture, SDLM_renderer);
-        loop(deltaTime, lastFrameTime/timerResolution, &SDLM_event);
+            renderLoop(SDLM_texture, SDLM_renderer);
+            loop(deltaTime, lastFrameTime/timerResolution);
 
-        SDL_SetRenderTarget(SDLM_renderer, NULL);
-		SDL_RenderCopy(SDLM_renderer, SDLM_texture, NULL, NULL);
-		SDL_RenderPresent(SDLM_renderer);
+            SDL_SetRenderTarget(SDLM_renderer, NULL);
+            SDL_RenderCopy(SDLM_renderer, SDLM_texture, NULL, NULL);
+            SDL_RenderPresent(SDLM_renderer);
 
-        float time = SDL_GetPerformanceCounter();
-		frameTime = time - lastFrameTime;
-		lastFrameTime = time;
-		deltaTime = frameTime / timerResolution;
-    }
+            float time = SDL_GetPerformanceCounter();
+            frameTime = time - lastFrameTime;
+            lastFrameTime = time;
+            deltaTime = frameTime / timerResolution;
+        }
 }
 
 int SDLM_destroy() {

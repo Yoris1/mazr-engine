@@ -17,9 +17,11 @@ vec2d pos;
 
 SDL_Surface* walls_surface;
 SDL_Texture* walls_texture;
-
+const Uint8* keyboardState;
 int main(int argc, char *argv[])
 {
+	keyboardState = SDL_GetKeyboardState(NULL);
+
 	pos.x = 5;
 	pos.y = 5;
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -37,21 +39,19 @@ int main(int argc, char *argv[])
 }
 float rot = 0;
 mat2x2 rotationMatrix;
-void loop(float dTime, float time, SDL_Event* event) {
-	if(event->type == SDL_KEYDOWN) {
-		if(event->key.keysym.sym == SDLK_UP)
-			pos.y += 10*dTime;
-		else if(event->key.keysym.sym == SDLK_DOWN)
-			pos.y -= 10*dTime;
-		if(event->key.keysym.sym == SDLK_RIGHT)
-			pos.x += 10*dTime;
-		else if(event->key.keysym.sym == SDLK_LEFT)
-			pos.x -= 10*dTime;
-		if(event->key.keysym.sym == SDLK_a)
-			rot += 40*dTime;
-		else if(event->key.keysym.sym == SDLK_d)
-			rot -= 40*dTime;
-	}
+void loop(float dTime, float time) {
+	if(keyboardState[SDL_SCANCODE_UP])
+		pos.y += 10*dTime;
+	else if(keyboardState[SDL_SCANCODE_DOWN])
+		pos.y -= 10*dTime;
+	if(keyboardState[SDL_SCANCODE_RIGHT])
+		pos.x += 10*dTime;
+	else if(keyboardState[SDL_SCANCODE_LEFT])
+		pos.x -= 10*dTime;
+	if(keyboardState[SDL_SCANCODE_A])
+		rot += 40*dTime;
+	else if(keyboardState[SDL_SCANCODE_D])
+		rot -= 40*dTime;
 	rotationMatrix = getRotationMatrix(rot);
 }
 void render(SDL_Texture *texture, SDL_Renderer *renderer) {
