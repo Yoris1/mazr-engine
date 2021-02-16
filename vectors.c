@@ -71,4 +71,5 @@ mat2x2 inverse(mat2x2* mat) {
 
     inverse.i.y = -mat->i.y * (1.0/det);
     inverse.j.x = -mat->j.x * (1.0/det);
+    return inverse;
 }
