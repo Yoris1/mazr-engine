@@ -3,7 +3,7 @@
 #include "raycaster.h"
 #include "sdlm.h"
 
-
+#define MOVE_SPEED 3
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
@@ -42,9 +42,9 @@ mat2x2 rotationMatrix;
 float fovTest = 0.5f;
 void loop(float dTime, float time) {
 	if(keyboardState[SDL_SCANCODE_A])
-		rot += 40*dTime;
+		rot += 180*dTime;
 	else if(keyboardState[SDL_SCANCODE_D])
-		rot -= 40*dTime;
+		rot -= 180*dTime;
 	rotationMatrix = getRotationMatrix(rot);
 
 	vec2d movDir;
@@ -52,14 +52,15 @@ void loop(float dTime, float time) {
 	movDir.y = 0;
 	
 	if(keyboardState[SDL_SCANCODE_UP])
-		movDir.y =+ 10*dTime;
+		movDir.y =+ MOVE_SPEED;
 	else if(keyboardState[SDL_SCANCODE_DOWN])
-		movDir.y =- 10*dTime;
+		movDir.y =- MOVE_SPEED;
 	if(keyboardState[SDL_SCANCODE_RIGHT])
-		movDir.x =+ 10*dTime;
+		movDir.x =+ MOVE_SPEED;
 	else if(keyboardState[SDL_SCANCODE_LEFT])
-		movDir.x =- 10*dTime;
+		movDir.x =- MOVE_SPEED;
 	
+	mulF(&movDir, dTime);	
 	mulMat2x2(&movDir, &rotationMatrix);
 	pos.x += movDir.x;
 	pos.y += movDir.y;
@@ -84,20 +85,17 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 
 	
 	vec2d d;
-	vec2d xOffset;
-	xOffset.x = 0.5f;
-	xOffset.y = 0;
 	pixel_row_rect.w = 1;
 	
 	for(int row = 0; row < WINDOW_WIDTH; row++) {
 		pixel_row_rect.x = row;
 		
-		float aspectRatioX = WINDOW_WIDTH/WINDOW_HEIGHT;
 		d.x = (float)row/WINDOW_WIDTH;
-		d.y = 2.f;
+		d.x -= 0.5f;
+		d.y = 1.0f;
+		d.x *= WINDOW_WIDTH/WINDOW_HEIGHT;
+		d.x *= fovTest;
 
-		sub(&d, &xOffset); // -0.5 to 0.5 to camera
-		d.x *= aspectRatioX;
 		normalize(&d);
 		mulMat2x2(&d, &rotationMatrix);
 
