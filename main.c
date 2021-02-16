@@ -71,6 +71,8 @@ void loop(float dTime, float time) {
 		fovTest -= 10*dTime;
 }
 void render(SDL_Texture *texture, SDL_Renderer *renderer) {
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
+	
 	SDL_SetRenderTarget(SDLM_renderer, SDLM_texture);
 
 	SDL_SetRenderDrawColor(SDLM_renderer, 0x0f, 0x0f, 0xff, 0xff);
@@ -104,14 +106,17 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 		ray.dist = 0;
 		ray.hitAxis = 0;
 		if(castRay(&ray)) {
-			float brightness = ray.dist*0xff/RENDER_DIST;
-			brightness = 1 - brightness;
-			SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0xff);
 			pixel_row_rect.h = pow(1-(ray.dist/RENDER_DIST), 2)*WINDOW_HEIGHT; 
 			pixel_row_rect.y = WINDOW_HEIGHT / 2 - pixel_row_rect.h / 2;
 			texture_sample_rect.x = floor(ray.hitTextureX*TEXTURE_WIDTH+TEXTURE_WIDTH*(ray.textureId-1));
 			SDL_RenderCopy(renderer, walls_texture, &texture_sample_rect, &pixel_row_rect);
-			//SDL_RenderDrawRect(SDLM_renderer, &pixel_row_rect);
+			
+
+			// SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0x0f);
+			if(ray.hitAxis){
+				SDL_SetRenderDrawColor(SDLM_renderer, 70, 70, 70, 0x70);
+				SDL_RenderDrawRect(SDLM_renderer, &pixel_row_rect);
+			}
 		}
 	}
 }
