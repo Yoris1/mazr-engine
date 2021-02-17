@@ -15,8 +15,7 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
     _SDLM_window = SDL_CreateWindow(title, 
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
-    width, height,
-    SDL_WINDOW_BORDERLESS | SDL_RENDERER_ACCELERATED);
+    width, height, SDL_WINDOW_BORDERLESS);
     
     if(_SDLM_window == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
