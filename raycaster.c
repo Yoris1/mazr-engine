@@ -1,4 +1,5 @@
 #include "raycaster.h"
+#include "texture_atlas.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -7,7 +8,7 @@ typedef struct ray {
         LALGBR_Vec2d direction;
         float dist;
         char hitAxis;
-        float hitTextureX;
+        float uv;
         char textureId;
 } Ray;
 
@@ -63,7 +64,7 @@ char map[10][10] = {
     {1, 1, 1, 2, 2, 2, 1, 1, 1, 1}
 };
 
-float getDist(LALGBR_Vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
+float getDist(LALGBR_Vec2d* p, char* hitAxis, float* uv, char* textureId) {
 	float minDist = RENDER_DIST;
     LALGBR_Vec2d pos;
     
@@ -94,10 +95,10 @@ float getDist(LALGBR_Vec2d* p, char* hitAxis, float* xHitPoint, char* textureId)
                  minDist = d;
                 *hitAxis = tempHitAxis;
                 if(tempHitAxis)
-                    *xHitPoint = (p->x-pos.x+TILE_SIZE)/TILE_SIZE/2;
+                    *uv = (p->x-pos.x+TILE_SIZE)/TILE_SIZE/2;
                 else
-                    *xHitPoint = (p->y-pos.y+TILE_SIZE)/TILE_SIZE/2;
-                // xHitPoint is 0 to 1 depending on how far along the surface it is.
+                    *uv = (p->y-pos.y+TILE_SIZE)/TILE_SIZE/2;
+                // uv is 0 to 1.
                 *textureId = map[x][y];
             }
         }
@@ -124,7 +125,7 @@ int testRay(Ray *ray) {
 		LALGBR_MulF(&dir, ray->dist);
 		LALGBR_Add(&point, &dir);
 
-		float d = getDist(&point, &(ray->hitAxis), &(ray->hitTextureX), &(ray->textureId));
+		float d = getDist(&point, &(ray->hitAxis), &(ray->uv), &(ray->textureId));
 
 		if(d < HIT_DIST)
 			return 1;
@@ -134,11 +135,9 @@ int testRay(Ray *ray) {
 	return 0;
 }
 
-#define TEXTURE_WIDTH 32
-#define TEXTURE_HEIGHT 32
 SDL_Rect pixel_column_rect;
 
-void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect, SDL_Texture* walls_texture) {
+void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
     SDL_SetRenderDrawBlendMode(context->renderer, SDL_BLENDMODE_MUL);
 	
     SDL_SetRenderTarget(context->renderer, context->target);
@@ -177,11 +176,22 @@ void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect,
 
 			pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
 
-			texture_sample_rect->x = floor(ray.hitTextureX*TEXTURE_WIDTH+TEXTURE_WIDTH*(ray.textureId-1));
-			SDL_RenderCopy(context->renderer, walls_texture, texture_sample_rect, &pixel_column_rect);
+
+
+            int textureColumn = (ray.textureId-1)%(textures->tiles_x);
+            int textureRow = ((ray.textureId-1)-textureColumn)/textures->tiles_y;
+			
+            //textures->sampleRect.w = 1;
+            //textures->sampleRect.h = textures->tile_height;
+
+            textures->sampleRect.x = 
+            floor(ray.uv*textures->tile_width+textures->tile_width*textureColumn);
+            textures->sampleRect.y = floor(textureRow*32);
+
+			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
 
-			// SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0x0f);
+			// SDL_SetRenderDrawColor(SDLM_renderer, ray.uv*255*(ray.textureId==2?0:1), ray.uv*255*(ray.textureId==1?0:1), 0, 0x0f);
 			if(ray.hitAxis){
 				SDL_SetRenderDrawColor(context->renderer, 70, 70, 70, 0x70);
 				SDL_RenderDrawRect(context->renderer, &pixel_column_rect);

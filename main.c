@@ -2,6 +2,7 @@
 #include "vectors.h"
 #include "raycaster.h"
 #include "sdlm.h"
+#include "texture_atlas.h"
 
 #define MOVE_SPEED 3
 #define WINDOW_WIDTH 640
@@ -13,13 +14,12 @@
 SDL_Rect texture_sample_rect;
 LALGBR_Vec2d pos;
 
-SDL_Surface* walls_surface;
-SDL_Texture* walls_texture;
 const Uint8* keyboardState;
 void loop(float dTime, float time);
 void render(SDL_Texture *t, SDL_Renderer *r);
 
 Camera* cam;
+TextureAtlas* textures;
 
 int main(int argc, char *argv[])
 {
@@ -30,13 +30,7 @@ int main(int argc, char *argv[])
 	cam = createCamera(pos, 107);
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
-	walls_surface = SDL_LoadBMP("textures/walls.bmp");
-	walls_texture = SDL_CreateTextureFromSurface(_SDLM_renderer, walls_surface);
-	
-	texture_sample_rect.w = 1;
-	texture_sample_rect.h = TEXTURE_HEIGHT;
-	texture_sample_rect.y = 0;
-
+	textures = loadAtlas(_SDLM_renderer, "textures/walls.bmp", 32, 32, 2, 1);
 	SDLM_initGameLoop(&loop, &render);
 	
 	SDLM_destroy();
@@ -89,5 +83,5 @@ void render(SDL_Texture *t, SDL_Renderer *r){
 	cont.target = t;
 	cont.window_height = WINDOW_HEIGHT;
 	cont.window_width = WINDOW_WIDTH;
-	raycast(&cont, cam, &texture_sample_rect, walls_texture);
+	raycast(&cont, cam, textures);
 }

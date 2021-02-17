@@ -1,5 +1,6 @@
 #pragma once
 #include "vectors.h"
+#include "texture_atlas.h"
 #include <SDL2/SDL.h>
 
 #define RENDER_DIST 50
@@ -18,4 +19,4 @@ LALGBR_Mat2x2* getCameraRotationMatrix(Camera* cam);
 void setCameraPosition(LALGBR_Vec2d pos, Camera* cam);
 void rotateCamera(float angle, Camera* cam);
 void setCameraFov(float angle, Camera* cam);
-void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect, SDL_Texture* walls_texture);
+void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures);

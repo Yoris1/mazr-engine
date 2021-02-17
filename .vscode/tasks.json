@@ -13,6 +13,7 @@
                 "${fileDirname}/${fileBasenameNoExtension}.o",
                 "vectors.c",
                 "raycaster.c",
+                "texture_atlas.c"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
