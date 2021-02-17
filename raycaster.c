@@ -16,9 +16,9 @@ char map[10][10] = {
 #define TILE_SIZE 0.51f
 // make this slightly bigger so i wouldn't get the lines in the middle between blocks
 
-float getDist(vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
+float getDist(LALGBR_Vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
 	float minDist = RENDER_DIST;
-    vec2d pos;
+    LALGBR_Vec2d pos;
     for(int x = 0; x < 10; x++) 
     {
         for(int y = 0; y < 10; y++) {
@@ -58,8 +58,8 @@ float getDist(vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
 #define MAX_STEPS 100
 
 int castRay(Ray *ray) {
-	vec2d point;
-	vec2d dir;
+	LALGBR_Vec2d point;
+	LALGBR_Vec2d dir;
 	
 	
 	for(int i = 0; i < MAX_STEPS; i++) {
@@ -70,8 +70,8 @@ int castRay(Ray *ray) {
 		
 		dir.x = ray->direction.x;
 		dir.y = ray->direction.y;
-		mulF(&dir, ray->dist);
-		add(&point, &dir);
+		LALGBR_MulF(&dir, ray->dist);
+		LALGBR_Add(&point, &dir);
 
 		float d = getDist(&point, &(ray->hitAxis), &(ray->hitTextureX), &(ray->textureId));
 

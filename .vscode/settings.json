@@ -1,6 +1,12 @@
 {
     "files.associations": {
         "random": "c",
-        "condition_variable": "c"
+        "condition_variable": "c",
+        "compare": "cpp",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "numeric": "cpp",
+        "cmath": "cpp",
+        "streambuf": "cpp"
     }
 }

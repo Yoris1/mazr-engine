@@ -13,7 +13,7 @@
 SDL_Rect pixel_row_rect;
 SDL_Rect texture_sample_rect;
 Ray ray;
-vec2d pos;
+LALGBR_Vec2d pos;
 
 float fov = 0;
 float fov_deg = 107;
@@ -47,15 +47,15 @@ int main(int argc, char *argv[])
 }
 
 float rot = 0;
-mat2x2 rotationMatrix;
+LALGBR_Mat2x2 rotationMatrix;
 void loop(float dTime, float time) {
 	if(keyboardState[SDL_SCANCODE_A])
 		rot += 180*dTime;
 	else if(keyboardState[SDL_SCANCODE_D])
 		rot -= 180*dTime;
-	rotationMatrix = getRotationMatrix(rot);
+	rotationMatrix = LALGBR_GetRotationMatrix(rot);
 
-	vec2d movDir;
+	LALGBR_Vec2d movDir;
 	movDir.x = 0;
 	movDir.y = 0;
 	
@@ -68,8 +68,8 @@ void loop(float dTime, float time) {
 	else if(keyboardState[SDL_SCANCODE_LEFT])
 		movDir.x =- MOVE_SPEED;
 	
-	mulF(&movDir, dTime);	
-	mulMat2x2(&movDir, &rotationMatrix);
+	LALGBR_MulF(&movDir, dTime);	
+	LALGBR_MulMat2x2(&movDir, &rotationMatrix);
 	pos.x += movDir.x;
 	pos.y += movDir.y;
 
@@ -100,7 +100,7 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 	SDL_RenderFillRect(renderer, &pixel_row_rect);
 
 	
-	vec2d d;
+	LALGBR_Vec2d d;
 	pixel_row_rect.w = 1;
 	
 	for(int row = 0; row < WINDOW_WIDTH; row++) {
@@ -113,8 +113,8 @@ void render(SDL_Texture *texture, SDL_Renderer *renderer) {
 		
 		d.x *= fov;
 
-		normalize(&d);
-		mulMat2x2(&d, &rotationMatrix);
+		LALGBR_Normalize(&d);
+		LALGBR_MulMat2x2(&d, &rotationMatrix);
 
 		ray.origin = pos;
 		ray.direction = d;

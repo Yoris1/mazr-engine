@@ -3,8 +3,8 @@
 #define RENDER_DIST 50
 
 typedef struct ray {
-        vec2d origin;
-        vec2d direction;
+        LALGBR_Vec2d origin;
+        LALGBR_Vec2d direction;
         float dist;
         char hitAxis;
         float hitTextureX;
