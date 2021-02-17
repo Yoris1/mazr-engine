@@ -11,20 +11,18 @@
 #define TEXTURE_HEIGHT 32
 
 SDL_Rect texture_sample_rect;
-Ray ray;
 LALGBR_Vec2d pos;
 
 SDL_Surface* walls_surface;
 SDL_Texture* walls_texture;
 const Uint8* keyboardState;
 void loop(float dTime, float time);
-void draw(SDL_Texture *texture, SDL_Renderer *renderer);
+void render(SDL_Texture *t, SDL_Renderer *r);
 
 Camera* cam;
 
 int main(int argc, char *argv[])
 {
-
 	keyboardState = SDL_GetKeyboardState(NULL);
 
 	pos.x = 5;
@@ -39,7 +37,7 @@ int main(int argc, char *argv[])
 	texture_sample_rect.h = TEXTURE_HEIGHT;
 	texture_sample_rect.y = 0;
 
-	SDLM_initGameLoop(&loop, &draw);
+	SDLM_initGameLoop(&loop, &render);
 	
 	SDLM_destroy();
 	free(cam);
@@ -81,10 +79,15 @@ void loop(float dTime, float time) {
 		fov -= 50*dTime;
 		setCameraFov(fov, cam);
 	}
-	printf("Delta time: %f", dTime);
+	printf("FPS: %f delta time: %f \n", 1/dTime, dTime);
 }
 
-void draw(SDL_Texture *texture, SDL_Renderer *renderer) {
+void render(SDL_Texture *t, SDL_Renderer *r){
 	setCameraPosition(pos, cam);
-	render(texture, renderer, WINDOW_WIDTH, WINDOW_HEIGHT,cam, &texture_sample_rect, walls_texture);
+	RenderContext cont;
+	cont.renderer = r;
+	cont.target = t;
+	cont.window_height = WINDOW_HEIGHT;
+	cont.window_width = WINDOW_WIDTH;
+	raycast(&cont, cam, &texture_sample_rect, walls_texture);
 }
