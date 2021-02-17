@@ -6,10 +6,6 @@ SDL_Texture *_SDLM_texture;
 SDL_Event _SDLM_event;
 SDL_Window *_SDLM_window;
 
-// declarations for signatures of the game and render loop to be used with sdlm
-void loop(float dTime, float time); 
-void render(SDL_Texture *texture, SDL_Renderer *renderer);
-
 int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, 
