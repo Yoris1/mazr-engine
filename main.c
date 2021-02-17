@@ -15,7 +15,7 @@ SDL_Rect texture_sample_rect;
 LALGBR_Vec2d pos;
 
 const Uint8* keyboardState;
-void loop(float dTime, float time);
+void loop(double dTime, float time);
 void render(SDL_Texture *t, SDL_Renderer *r);
 
 Camera* cam;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 float rot = 0;
 float fov = 107;
 
-void loop(float dTime, float time) {
+void loop(double dTime, float time) {
 	if(keyboardState[SDL_SCANCODE_A])
 		rotateCamera(180*dTime, cam);
 	else if(keyboardState[SDL_SCANCODE_D])

@@ -37,12 +37,12 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
     return 0;
 }
 
-int SDLM_initGameLoop(void (*loop)(float dTime, float time), 
+int SDLM_initGameLoop(void (*loop)(double dTime, float time), 
     void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
-        float timerResolution = SDL_GetPerformanceFrequency();
-        float lastFrameTime = SDL_GetPerformanceCounter();
+        Uint64 timerResolution = SDL_GetPerformanceFrequency();
+        Uint64 lastFrameTime = SDL_GetPerformanceCounter();
         float frameTime = 0;
-        float deltaTime = 0;
+        double deltaTime = 0;
         while(1) {
             while(SDL_PollEvent(&_SDLM_event))
             // only poll for quit event, don't care about the rest for now
@@ -50,16 +50,16 @@ int SDLM_initGameLoop(void (*loop)(float dTime, float time),
                     return 0; // exiting on user request
 
             renderLoop(_SDLM_texture, _SDLM_renderer);
-            loop(deltaTime, lastFrameTime/timerResolution);
+            loop(deltaTime, (float)lastFrameTime/(float)timerResolution);
 
             SDL_SetRenderTarget(_SDLM_renderer, NULL);
             SDL_RenderCopy(_SDLM_renderer, _SDLM_texture, NULL, NULL);
             SDL_RenderPresent(_SDLM_renderer);
 
-            float time = SDL_GetPerformanceCounter();
+            Uint64 time = SDL_GetPerformanceCounter();
             frameTime = time - lastFrameTime;
             lastFrameTime = time;
-            deltaTime = frameTime / timerResolution;
+            deltaTime = (double)frameTime / (double)timerResolution;
         }
 }
 
