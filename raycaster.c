@@ -6,11 +6,15 @@
 typedef struct ray {
         LALGBR_Vec2d origin;
         LALGBR_Vec2d direction;
-        float dist;
-        char hitAxis;
-        float uv;
-        char textureId;
 } Ray;
+typedef struct ray_hit {
+    LALGBR_Vec2d point;
+    LALGBR_Vec2d tile_pos;
+    char textureId;
+    float dist;
+    float uv;
+    char hit_face; // [0; 4)
+} Hit;
 
 typedef struct Camera  {
     LALGBR_Vec2d pos;
@@ -64,73 +68,74 @@ char map[10][10] = {
     {1, 1, 1, 2, 2, 2, 1, 1, 1, 1}
 };
 
-float getDist(LALGBR_Vec2d* p, char* hitAxis, float* uv, char* textureId) {
+float getDist(LALGBR_Vec2d* p, Hit* hit) {
 	float minDist = RENDER_DIST;
-    LALGBR_Vec2d pos;
     
     float a, b, d;
     for(int x = 0; x < 10; x++) 
     {
         for(int y = 0; y < 10; y++) {
             if(map[x][y] == 0) continue;
-            pos.x = x;
-            pos.y = y;
-
-            a = p->x - pos.x;
+            a = p->x - x;
             a*=a;
-            b = p->y - pos.y;
+            b = p->y - y;
             b*=b;
 
-            char tempHitAxis;
-            if(a > b) {
+            if(a > b)
                 d = a;
-                tempHitAxis = 0;
-            }
-            else {
+            else
                 d = b;
-                tempHitAxis = 1;
-            }
 
             if(minDist > d) {
                  minDist = d;
-                *hitAxis = tempHitAxis;
-                if(tempHitAxis)
-                    *uv = (p->x-pos.x+TILE_SIZE)/TILE_SIZE/2;
-                else
-                    *uv = (p->y-pos.y+TILE_SIZE)/TILE_SIZE/2;
-                // uv is 0 to 1.
-                *textureId = map[x][y];
+                hit->tile_pos.x = x;
+                hit->tile_pos.y = y;
+                hit->textureId = map[x][y];
             }
         }
     }
 	return SDL_sqrtf(minDist)-TILE_SIZE;
 }
+void calculateHitUVAndFace(Hit* hit) {
+    hit->point;
+    float a = hit->point.x - hit->tile_pos.x;
+    float b = hit->point.y - hit->tile_pos.y;
+    if(a*a > b*b) {
+        hit->hit_face = 1;
+        hit->uv = (b+TILE_SIZE)/2/TILE_SIZE;
+    } else {
+        hit->hit_face = 0;
+        hit->uv = (a+TILE_SIZE)/2/TILE_SIZE;
+    }
+    // TODO implement detection for which one of the 4 faces was hit
+}
 
 #define HIT_DIST 0.005f
 #define MAX_STEPS 100
 
-int testRay(Ray *ray) {
-	LALGBR_Vec2d point;
+int testRay(Ray *ray, Hit *hit) {
 	LALGBR_Vec2d dir;
-	
+	hit->dist = 0;
 	
 	for(int i = 0; i < MAX_STEPS; i++) {
-		if(ray->dist > RENDER_DIST) 
+		if(hit->dist > RENDER_DIST) 
 			break;
-		point.x = ray->origin.x;
-		point.y = ray->origin.y;
+		hit->point.x = ray->origin.x;
+		hit->point.y = ray->origin.y;
 		
 		dir.x = ray->direction.x;
 		dir.y = ray->direction.y;
-		LALGBR_MulF(&dir, ray->dist);
-		LALGBR_Add(&point, &dir);
+		LALGBR_MulF(&dir, hit->dist);
+		LALGBR_Add(&hit->point, &dir);
 
-		float d = getDist(&point, &(ray->hitAxis), &(ray->uv), &(ray->textureId));
+		float d = getDist(&hit->point, hit);
 
-		if(d < HIT_DIST)
-			return 1;
+		if(d < HIT_DIST) {
+			calculateHitUVAndFace(hit);
+            return 1;
+        }
 
-		ray->dist += d*0.9f;
+		hit->dist += d;
 	}   
 	return 0;
 }
@@ -153,6 +158,7 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 	pixel_column_rect.h = context->window_height;
 	SDL_RenderFillRect(context->renderer, &pixel_column_rect);
     Ray ray;
+    Hit hit;
 
 	pixel_column_rect.w = 1;
 	
@@ -169,33 +175,36 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 		LALGBR_MulMat2x2(&ray.direction, &cam->rotationMatrix);
 
 		ray.origin = cam->pos;
-		ray.dist = 0;
-		ray.hitAxis = 0;
-		if(testRay(&ray)) {
-			pixel_column_rect.h = context->window_height/ray.dist;
+        
+
+		if(testRay(&ray, &hit)) {
+			pixel_column_rect.h = context->window_height/hit.dist;
 
 			pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
 
 
 
-            int textureColumn = (ray.textureId-1)%(textures->tiles_x);
-            int textureRow = ((ray.textureId-1)-textureColumn)/textures->tiles_y;
+            int textureColumn = (hit.textureId-1)%(textures->tiles_x);
+            int textureRow = ((hit.textureId-1)-textureColumn)/textures->tiles_y;
 			
             //textures->sampleRect.w = 1;
             //textures->sampleRect.h = textures->tile_height;
 
             textures->sampleRect.x = 
-            floor(ray.uv*textures->tile_width+textures->tile_width*textureColumn);
+            floor(hit.uv*textures->tile_width+textures->tile_width*textureColumn);
             textures->sampleRect.y = floor(textureRow*32);
+
+
+            if(hit.hit_face)
+				SDL_SetTextureColorMod(textures->image, 0xb0, 0xb0, 0xb0);
+			else
+                SDL_SetTextureColorMod(textures->image, 0xff, 0xff, 0xff);
 
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
 
 			// SDL_SetRenderDrawColor(SDLM_renderer, ray.uv*255*(ray.textureId==2?0:1), ray.uv*255*(ray.textureId==1?0:1), 0, 0x0f);
-			if(ray.hitAxis){
-				SDL_SetRenderDrawColor(context->renderer, 70, 70, 70, 0x70);
-				SDL_RenderDrawRect(context->renderer, &pixel_column_rect);
-			}
+			
 		}
 	}
 }
