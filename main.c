@@ -17,6 +17,7 @@ LALGBR_Vec2d pos;
 
 float fov = 0;
 float fov_deg = 107;
+// definitely should move to it's own c file, this has no place in main.
 void updateFOV() {
 	fov = atan(M_PI/180*(fov_deg/2))*2;
 }
@@ -24,6 +25,8 @@ void updateFOV() {
 SDL_Surface* walls_surface;
 SDL_Texture* walls_texture;
 const Uint8* keyboardState;
+void loop(float dTime, float time);
+void render(SDL_Texture *texture, SDL_Renderer *renderer);
 
 int main(int argc, char *argv[])
 {

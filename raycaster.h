@@ -11,4 +11,9 @@ typedef struct ray {
         char textureId;
 } Ray;
 
+typedef struct Camera  {
+    LALGBR_Vec2d pos;
+    float fov;
+} Camera;
+
 int castRay(Ray* ray);
