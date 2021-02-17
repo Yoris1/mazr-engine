@@ -1,5 +1,45 @@
 #include "raycaster.h"
 #include <math.h>
+#include <stdlib.h>
+
+typedef struct Camera  {
+    LALGBR_Vec2d pos;
+    float rotation;
+    LALGBR_Mat2x2 rotationMatrix;
+
+    float fovAngle;
+    
+    float fov;
+} Camera;
+
+void recreateCameraRotationMatrix(Camera* cam) {
+    cam->rotationMatrix = LALGBR_GetRotationMatrix(cam->rotation);
+}
+Camera* createCamera(LALGBR_Vec2d pos, float fov) {
+    Camera* cam = (Camera*) malloc(sizeof(Camera));
+    cam->pos = pos;
+    cam->rotation = 0;
+    recreateCameraRotationMatrix(cam);
+    setCameraFov(fov, cam);
+    return cam;
+}
+LALGBR_Mat2x2* getCameraRotationMatrix(Camera* cam) {
+    return &(cam->rotationMatrix);
+}
+void setCameraPosition(LALGBR_Vec2d pos, Camera* cam){
+    cam->pos = pos;
+}
+void rotateCamera(float angle, Camera* cam) {
+    cam->rotation += angle;
+    recreateCameraRotationMatrix(cam);
+}
+void setCameraFov(float angle, Camera* cam) {
+    cam->fovAngle = angle;
+    cam->fov = atan(M_PI/180*(cam->fovAngle/2))*2;
+}
+
+
+
 
 char map[10][10] = {
     {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
@@ -19,16 +59,20 @@ char map[10][10] = {
 float getDist(LALGBR_Vec2d* p, char* hitAxis, float* xHitPoint, char* textureId) {
 	float minDist = RENDER_DIST;
     LALGBR_Vec2d pos;
+    
+    float a, b, d;
     for(int x = 0; x < 10; x++) 
     {
         for(int y = 0; y < 10; y++) {
             if(map[x][y] == 0) continue;
             pos.x = x;
             pos.y = y;
-            float a, b, d;
 
-            a = sqrt(pow(p->x - pos.x, 2))-TILE_SIZE;
-            b = sqrt(pow(p->y - pos.y, 2))-TILE_SIZE;
+            a = p->x - pos.x;
+            a*=a;
+            b = p->y - pos.y;
+            b*=b;
+
             char tempHitAxis;
             if(a > b) {
                 d = a;
@@ -51,10 +95,9 @@ float getDist(LALGBR_Vec2d* p, char* hitAxis, float* xHitPoint, char* textureId)
             }
         }
     }
-
-	return minDist;
+	return SDL_sqrtf(minDist)-TILE_SIZE;
 }
-#define HIT_DIST 0.001f
+#define HIT_DIST 0.005f
 #define MAX_STEPS 100
 
 int castRay(Ray *ray) {
@@ -81,4 +124,63 @@ int castRay(Ray *ray) {
 		ray->dist += d*0.9f;
 	}   
 	return 0;
+}
+
+#define TEXTURE_WIDTH 32
+#define TEXTURE_HEIGHT 32
+SDL_Rect pixel_row_rect;
+void render(SDL_Texture *texture, SDL_Renderer *renderer, int window_width, int window_height,
+Camera* cam, SDL_Rect* texture_sample_rect, SDL_Texture* walls_texture) {
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
+	
+	SDL_SetRenderTarget(renderer, texture);
+
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0xff, 0xff);
+	SDL_RenderClear(renderer);
+	
+	SDL_SetRenderDrawColor(renderer, 0x0f, 0x0f, 0x0f, 0xff);
+	pixel_row_rect.w = window_width;
+	pixel_row_rect.x = 0;
+
+	pixel_row_rect.y = window_height/2;
+	pixel_row_rect.h = window_height;
+	SDL_RenderFillRect(renderer, &pixel_row_rect);
+    Ray ray;
+	
+	LALGBR_Vec2d d;
+	pixel_row_rect.w = 1;
+	
+	for(int row = 0; row < window_width; row++) {
+		pixel_row_rect.x = row;
+		
+		d.x = (float)row/window_width;
+		d.x -= 0.5f;
+		d.y = 1.0f;
+		d.x *= window_width/window_height;
+		
+		d.x *= cam->fov;
+
+		LALGBR_Normalize(&d);
+		LALGBR_MulMat2x2(&d, &cam->rotationMatrix);
+
+		ray.origin = cam->pos;
+		ray.direction = d;
+		ray.dist = 0;
+		ray.hitAxis = 0;
+		if(castRay(&ray)) {
+			pixel_row_rect.h = window_height/ray.dist;
+
+			pixel_row_rect.y = window_height / 2 - pixel_row_rect.h / 2;
+
+			texture_sample_rect->x = floor(ray.hitTextureX*TEXTURE_WIDTH+TEXTURE_WIDTH*(ray.textureId-1));
+			SDL_RenderCopy(renderer, walls_texture, texture_sample_rect, &pixel_row_rect);
+			
+
+			// SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0x0f);
+			if(ray.hitAxis){
+				SDL_SetRenderDrawColor(renderer, 70, 70, 70, 0x70);
+				SDL_RenderDrawRect(renderer, &pixel_row_rect);
+			}
+		}
+	}
 }
