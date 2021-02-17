@@ -136,7 +136,7 @@ int testRay(Ray *ray) {
 
 #define TEXTURE_WIDTH 32
 #define TEXTURE_HEIGHT 32
-SDL_Rect pixel_row_rect;
+SDL_Rect pixel_column_rect;
 
 void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect, SDL_Texture* walls_texture) {
     SDL_SetRenderDrawBlendMode(context->renderer, SDL_BLENDMODE_MUL);
@@ -147,20 +147,20 @@ void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect,
 	SDL_RenderClear(context->renderer);
 	
 	SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0x0f, 0xff);
-	pixel_row_rect.w = context->window_width;
-	pixel_row_rect.x = 0;
+	pixel_column_rect.w = context->window_width;
+	pixel_column_rect.x = 0;
 
-	pixel_row_rect.y = context->window_height/2;
-	pixel_row_rect.h = context->window_height;
-	SDL_RenderFillRect(context->renderer, &pixel_row_rect);
+	pixel_column_rect.y = context->window_height/2;
+	pixel_column_rect.h = context->window_height;
+	SDL_RenderFillRect(context->renderer, &pixel_column_rect);
     Ray ray;
 
-	pixel_row_rect.w = 1;
+	pixel_column_rect.w = 1;
 	
-	for(int row = 0; row < context->window_width; row++) {
-		pixel_row_rect.x = row;
+	for(int column = 0; column < context->window_width; column++) {
+		pixel_column_rect.x = column;
 		
-		ray.direction.x = (float)row/context->window_width;
+		ray.direction.x = (float)column/context->window_width;
 		ray.direction.x -= 0.5f;
 		ray.direction.y = 1.0f;
 		ray.direction.x *= context->window_width/context->window_height;
@@ -173,18 +173,18 @@ void raycast(RenderContext* context, Camera* cam, SDL_Rect* texture_sample_rect,
 		ray.dist = 0;
 		ray.hitAxis = 0;
 		if(testRay(&ray)) {
-			pixel_row_rect.h = context->window_height/ray.dist;
+			pixel_column_rect.h = context->window_height/ray.dist;
 
-			pixel_row_rect.y = context->window_height / 2 - pixel_row_rect.h / 2;
+			pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
 
 			texture_sample_rect->x = floor(ray.hitTextureX*TEXTURE_WIDTH+TEXTURE_WIDTH*(ray.textureId-1));
-			SDL_RenderCopy(context->renderer, walls_texture, texture_sample_rect, &pixel_row_rect);
+			SDL_RenderCopy(context->renderer, walls_texture, texture_sample_rect, &pixel_column_rect);
 			
 
 			// SDL_SetRenderDrawColor(SDLM_renderer, ray.hitTextureX*255*(ray.textureId==2?0:1), ray.hitTextureX*255*(ray.textureId==1?0:1), 0, 0x0f);
 			if(ray.hitAxis){
 				SDL_SetRenderDrawColor(context->renderer, 70, 70, 70, 0x70);
-				SDL_RenderDrawRect(context->renderer, &pixel_row_rect);
+				SDL_RenderDrawRect(context->renderer, &pixel_column_rect);
 			}
 		}
 	}
