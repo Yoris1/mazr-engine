@@ -113,6 +113,11 @@ void calculateHitUVAndFace(Hit* hit) {
     // clamp uv to 0 to 1, cause it can sometimes be slightly larger or smaller because of min hit dist.
     hit->uv = hit->uv<0?0:hit->uv;
     hit->uv = hit->uv>1?1:hit->uv;
+
+    if(hit->hit_face == 1 || hit->hit_face == 2) 
+            hit->uv = 1-hit->uv;
+    // fix uv direction for faces that have it reversed
+    
 }
 
 #define HIT_DIST 0.0075f
@@ -177,20 +182,22 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 		ray.direction.x *= cam->fov;
 
 		LALGBR_Normalize(&ray.direction);
+        double rayAngle = fabsf(atan(ray.direction.y/ray.direction.x));
 		LALGBR_MulMat2x2(&ray.direction, &cam->rotationMatrix);
 
 		ray.origin = cam->pos;
         
 
 		if(testRay(&ray, &hit)) {
-			pixel_column_rect.h = context->window_height/hit.dist;
+            float distToCameraPlane = sin(rayAngle)*hit.dist;
+			pixel_column_rect.h = round(context->window_height/distToCameraPlane);
 
 			pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
 
 
 
             int textureColumn = (hit.textureId-1)%(textures->tiles_x);
-            int textureRow = ((hit.textureId-1)-textureColumn)/textures->tiles_y;
+            int textureRow = hit.hit_face;
 			
             //textures->sampleRect.w = 1;
             //textures->sampleRect.h = textures->tile_height;
@@ -199,25 +206,6 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
             textures->sampleRect.x += textures->tile_width*textureColumn;
             textures->sampleRect.y = floor(textureRow*32);
 
-
-            switch (hit.hit_face)
-            {
-            case 0:
-				SDL_SetTextureColorMod(textures->image, 0xff, 0xb0, 0xb0);
-                break;
-            case 1:
-                SDL_SetTextureColorMod(textures->image, 0xb0, 0xff, 0xb0);
-                break;
-            case 2: 
-                SDL_SetTextureColorMod(textures->image, 0xb0, 0xb0, 0xff);
-                break;
-            case 3:
-                SDL_SetTextureColorMod(textures->image, 0xff, 0xff, 0xff);
-                break;
-            default:
-                break;
-            }
-            
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
 

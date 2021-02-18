@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
 	
-	textures = loadAtlas(_SDLM_renderer, "textures/walls.bmp", 
+	textures = loadAtlas(_SDLM_renderer, "textures/walls_atlas.bmp", 
 		TEXTURE_WIDTH, TEXTURE_HEIGHT, 2, 1);
 	SDLM_initGameLoop(&loop, &render);
 	
