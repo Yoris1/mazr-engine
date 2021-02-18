@@ -17,3 +17,7 @@ TextureAtlas* loadAtlas(SDL_Renderer* renderer, const char* path, int width, int
     atlas->tile_width = width;
     return atlas;
 }
+void destroyAtlas(TextureAtlas* atlas) {
+    SDL_DestroyTexture(atlas->image);
+    free(atlas);
+}

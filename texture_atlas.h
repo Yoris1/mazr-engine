@@ -9,3 +9,4 @@ typedef struct TextureAtlas {
     int tile_width;
 } TextureAtlas;
 TextureAtlas* loadAtlas(SDL_Renderer* renderer, const char* path, int width, int height, int countX, int countY);
+void destroyAtlas(TextureAtlas* atlas);
