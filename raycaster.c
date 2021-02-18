@@ -97,17 +97,24 @@ float getDist(LALGBR_Vec2d* p, Hit* hit) {
 	return SDL_sqrtf(minDist)-TILE_SIZE;
 }
 void calculateHitUVAndFace(Hit* hit) {
-    hit->point;
     float a = hit->point.x - hit->tile_pos.x;
     float b = hit->point.y - hit->tile_pos.y;
     if(a*a > b*b) {
-        hit->hit_face = 1;
+        if(hit->point.x > hit->tile_pos.x)
+            hit->hit_face = 0;
+        else
+            hit->hit_face = 2;
         hit->uv = (b+TILE_SIZE)/2/TILE_SIZE;
     } else {
-        hit->hit_face = 0;
+        if(hit->point.y > hit->tile_pos.y)
+            hit->hit_face = 1;
+        else
+            hit->hit_face = 3;
         hit->uv = (a+TILE_SIZE)/2/TILE_SIZE;
     }
-    // TODO implement detection for which one of the 4 faces was hit
+    // clamp uv to 0 to 1, cause it can sometimes be slightly larger or smaller because of min hit dist.
+    hit->uv = hit->uv<0?0:hit->uv;
+    hit->uv = hit->uv>1?1:hit->uv;
 }
 
 #define HIT_DIST 0.005f
@@ -195,11 +202,24 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
             textures->sampleRect.y = floor(textureRow*32);
 
 
-            if(hit.hit_face)
-				SDL_SetTextureColorMod(textures->image, 0xb0, 0xb0, 0xb0);
-			else
+            switch (hit.hit_face)
+            {
+            case 0:
+				SDL_SetTextureColorMod(textures->image, 0xff, 0xb0, 0xb0);
+                break;
+            case 1:
+                SDL_SetTextureColorMod(textures->image, 0xb0, 0xff, 0xb0);
+                break;
+            case 2: 
+                SDL_SetTextureColorMod(textures->image, 0xb0, 0xb0, 0xff);
+                break;
+            case 3:
                 SDL_SetTextureColorMod(textures->image, 0xff, 0xff, 0xff);
-
+                break;
+            default:
+                break;
+            }
+            
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
 
