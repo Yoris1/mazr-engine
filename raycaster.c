@@ -115,8 +115,8 @@ void calculateHitUVAndFace(Hit* hit) {
     hit->uv = hit->uv>1?1:hit->uv;
 }
 
-#define HIT_DIST 0.005f
-#define MAX_STEPS 100
+#define HIT_DIST 0.0075f
+#define MAX_STEPS 200
 
 int testRay(Ray *ray, Hit *hit) {
 	LALGBR_Vec2d dir;
