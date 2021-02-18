@@ -28,9 +28,12 @@ int main(int argc, char *argv[])
 	pos.x = 5;
 	pos.y = 5;
 	cam = createCamera(pos, 107);
+	
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
-	textures = loadAtlas(_SDLM_renderer, "textures/walls.bmp", 32, 32, 2, 1);
+	
+	textures = loadAtlas(_SDLM_renderer, "textures/walls.bmp", 
+		TEXTURE_WIDTH, TEXTURE_HEIGHT, 2, 1);
 	SDLM_initGameLoop(&loop, &render);
 	
 	free(cam);
