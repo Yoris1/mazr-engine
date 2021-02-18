@@ -53,7 +53,7 @@ void setCameraFov(float angle, Camera* cam) {
 
 
 
-#define TILE_SIZE 0.51f
+#define TILE_SIZE 0.5f
 // Tile is slightly bigger than grid so there wouldn't be any empty columns between them
 char map[10][10] = {
     {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
@@ -76,10 +76,8 @@ float getDist(LALGBR_Vec2d* p, Hit* hit) {
     {
         for(int y = 0; y < 10; y++) {
             if(map[x][y] == 0) continue;
-            a = p->x - x;
-            a*=a;
-            b = p->y - y;
-            b*=b;
+            a = fabsf(p->x - x);
+            b = fabsf(p->y - y);
 
             if(a > b)
                 d = a;
@@ -94,7 +92,7 @@ float getDist(LALGBR_Vec2d* p, Hit* hit) {
             }
         }
     }
-	return SDL_sqrtf(minDist)-TILE_SIZE;
+	return minDist-TILE_SIZE;
 }
 void calculateHitUVAndFace(Hit* hit) {
     float a = hit->point.x - hit->tile_pos.x;
@@ -197,8 +195,8 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
             //textures->sampleRect.w = 1;
             //textures->sampleRect.h = textures->tile_height;
 
-            textures->sampleRect.x = 
-            floor(hit.uv*textures->tile_width+textures->tile_width*textureColumn);
+            textures->sampleRect.x = round(hit.uv*(textures->tile_width-1));
+            textures->sampleRect.x += textures->tile_width*textureColumn;
             textures->sampleRect.y = floor(textureRow*32);
 
 
