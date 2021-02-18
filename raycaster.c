@@ -204,7 +204,7 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 
             textures->sampleRect.x = round(hit.uv*(textures->tile_width-1));
             textures->sampleRect.x += textures->tile_width*textureColumn;
-            textures->sampleRect.y = floor(textureRow*32);
+            textures->sampleRect.y = floor(textureRow*textures->tile_height);
 
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
