@@ -38,7 +38,7 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
 }
 
 int SDLM_initGameLoop(void (*loop)(double dTime, float time), 
-    void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
+    void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r), float* targetFramerate) {
         Uint64 timerResolution = SDL_GetPerformanceFrequency();
         Uint64 lastFrameTime = SDL_GetPerformanceCounter();
         float frameTime = 0;
@@ -58,6 +58,12 @@ int SDLM_initGameLoop(void (*loop)(double dTime, float time),
 
             Uint64 time = SDL_GetPerformanceCounter();
             frameTime = time - lastFrameTime;
+            if(frameTime<timerResolution/(*targetFramerate)) {
+                SDL_Delay((timerResolution/(*targetFramerate)-frameTime)/timerResolution*1000);
+                time = SDL_GetPerformanceCounter();
+                frameTime = time - lastFrameTime;
+            } // TODO make this framerate stuff somehow better integrated then uploda to git
+
             lastFrameTime = time;
             deltaTime = (double)frameTime / (double)timerResolution;
         }
