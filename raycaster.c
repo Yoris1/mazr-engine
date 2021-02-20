@@ -152,15 +152,9 @@ int testRay(Ray *ray, Hit *hit) {
 
 SDL_Rect pixel_column_rect;
 
-void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
-    SDL_SetRenderDrawBlendMode(context->renderer, SDL_BLENDMODE_MUL);
-	
+void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int row) {
     SDL_SetRenderTarget(context->renderer, context->target);
 
-    SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0xff, 0xff);
-	SDL_RenderClear(context->renderer);
-	
-	SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0x0f, 0xff);
 	pixel_column_rect.w = context->window_width;
 	pixel_column_rect.x = 0;
 
@@ -191,10 +185,10 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 		if(testRay(&ray, &hit)) {
             float distToCameraPlane = sin(rayAngle)*hit.dist;
 			pixel_column_rect.h = round(context->window_height/distToCameraPlane);
-
-			pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
-
-
+           
+            pixel_column_rect.y = context->window_height / 2 - pixel_column_rect.h / 2;
+            
+            pixel_column_rect.y -= pixel_column_rect.h*row;
 
             int textureColumn = (hit.textureId-1)%(textures->tiles_x);
             int textureRow = hit.hit_face;
@@ -213,4 +207,11 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures) {
 			
 		}
 	}
+}
+
+void drawBackground(RenderContext* context) {
+    SDL_SetRenderTarget(context->renderer, context->target);
+    SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0xff, 0xff);
+	SDL_RenderClear(context->renderer);
+	SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0x0f, 0xff);
 }
