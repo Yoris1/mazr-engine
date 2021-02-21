@@ -154,13 +154,6 @@ SDL_Rect pixel_column_rect;
 
 void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int row) {
     SDL_SetRenderTarget(context->renderer, context->target);
-
-	pixel_column_rect.w = context->window_width;
-	pixel_column_rect.x = 0;
-
-	pixel_column_rect.y = context->window_height/2;
-	pixel_column_rect.h = context->window_height;
-	SDL_RenderFillRect(context->renderer, &pixel_column_rect);
     Ray ray;
     Hit hit;
 
@@ -181,7 +174,7 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int ro
 
 		ray.origin = cam->pos;
         
-
+        map[2][3] = !row;
 		if(testRay(&ray, &hit)) {
             float distToCameraPlane = sin(rayAngle)*hit.dist;
 			pixel_column_rect.h = round(context->window_height/distToCameraPlane);
@@ -200,6 +193,11 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int ro
             textures->sampleRect.x += textures->tile_width*textureColumn;
             textures->sampleRect.y = floor(textureRow*textures->tile_height);
 
+            float darkness = hit.dist*hit.dist;
+            darkness = darkness<2?2:darkness;
+            float brightness = 2/darkness;
+            SDL_SetTextureColorMod(textures->image, brightness*0xff, brightness*0xff, brightness*0xff);
+
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
 			
 
@@ -214,4 +212,10 @@ void drawBackground(RenderContext* context) {
     SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0xff, 0xff);
 	SDL_RenderClear(context->renderer);
 	SDL_SetRenderDrawColor(context->renderer, 0x0f, 0x0f, 0x0f, 0xff);
+	
+    pixel_column_rect.w = context->window_width;
+	pixel_column_rect.x = 0;
+	pixel_column_rect.y = context->window_height/2;
+	pixel_column_rect.h = context->window_height;
+	SDL_RenderFillRect(context->renderer, &pixel_column_rect);
 }

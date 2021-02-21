@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	
 	textures = loadAtlas(_SDLM_renderer, "textures/walls_atlas.bmp", 
 		TEXTURE_WIDTH, TEXTURE_HEIGHT, 2, 1);
-	SDLM_SetTargetFPS(60);
+	SDLM_SetTargetFPS(25);
 	SDLM_initGameLoop(&loop, &render);
 	
 	free(cam);
@@ -57,15 +57,17 @@ void loop(double dTime, float time) {
 	movDir.y = 0;
 	
 	if(keyboardState[SDL_SCANCODE_UP])
-		movDir.y =+ MOVE_SPEED;
+		movDir.y = 1;
 	else if(keyboardState[SDL_SCANCODE_DOWN])
-		movDir.y =- MOVE_SPEED;
+		movDir.y =-1;
 	if(keyboardState[SDL_SCANCODE_RIGHT])
-		movDir.x =+ MOVE_SPEED;
+		movDir.x = 1;
 	else if(keyboardState[SDL_SCANCODE_LEFT])
-		movDir.x =- MOVE_SPEED;
-
-	LALGBR_MulF(&movDir, dTime);	
+		movDir.x =-1;
+	
+	if(movDir.x != 0 && movDir.y != 0)
+		LALGBR_Normalize(&movDir);
+	LALGBR_MulF(&movDir, dTime*MOVE_SPEED);	
 	LALGBR_MulMat2x2(&movDir, getCameraRotationMatrix(cam));
 	pos.x += movDir.x;
 	pos.y += movDir.y;
@@ -89,5 +91,6 @@ void render(SDL_Texture *t, SDL_Renderer *r){
 	cont.window_height = WINDOW_HEIGHT;
 	cont.window_width = WINDOW_WIDTH;
 	drawBackground(&cont);
+	raycast(&cont, cam, textures, 1);
 	raycast(&cont, cam, textures, 0);
 }
