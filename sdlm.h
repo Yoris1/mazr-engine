@@ -5,6 +5,7 @@ SDL_Renderer *_SDLM_renderer;
 SDL_Texture *_SDLM_texture;
 SDL_Event _SDLM_event;
 SDL_Window *_SDLM_window;
+float _SDLM_target_frametime;
 
 int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -38,7 +39,7 @@ int SDLM_SetupWindowWithRenderContext(const char* title, int width, int height) 
 }
 
 int SDLM_initGameLoop(void (*loop)(double dTime, float time), 
-    void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r), float* targetFramerate) {
+    void (*renderLoop)(SDL_Texture *t, SDL_Renderer *r)) {
         Uint64 timerResolution = SDL_GetPerformanceFrequency();
         Uint64 lastFrameTime = SDL_GetPerformanceCounter();
         float frameTime = 0;
@@ -58,17 +59,19 @@ int SDLM_initGameLoop(void (*loop)(double dTime, float time),
 
             Uint64 time = SDL_GetPerformanceCounter();
             frameTime = time - lastFrameTime;
-            if(frameTime<timerResolution/(*targetFramerate)) {
-                SDL_Delay((timerResolution/(*targetFramerate)-frameTime)/timerResolution*1000);
+            if(frameTime<_SDLM_target_frametime) {
+                float delay = (_SDLM_target_frametime-frameTime)/timerResolution;
+                SDL_Delay(floor(delay*1000));
                 time = SDL_GetPerformanceCounter();
                 frameTime = time - lastFrameTime;
-            } // TODO make this framerate stuff somehow better integrated then uploda to git
-
+            }
             lastFrameTime = time;
             deltaTime = (double)frameTime / (double)timerResolution;
         }
 }
-
+void SDLM_SetTargetFPS(float fps) {
+    _SDLM_target_frametime = SDL_GetPerformanceFrequency()/fps;
+}
 int SDLM_destroy() {
     SDL_DestroyRenderer(_SDLM_renderer);
 	SDL_DestroyTexture(_SDLM_texture);

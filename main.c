@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
 	
 	textures = loadAtlas(_SDLM_renderer, "textures/walls_atlas.bmp", 
 		TEXTURE_WIDTH, TEXTURE_HEIGHT, 2, 1);
-	float fps = 20;
-	SDLM_initGameLoop(&loop, &render, &fps);
+	SDLM_SetTargetFPS(60);
+	SDLM_initGameLoop(&loop, &render);
 	
 	free(cam);
 	destroyAtlas(textures);
