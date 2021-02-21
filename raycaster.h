@@ -19,4 +19,5 @@ LALGBR_Mat2x2* getCameraRotationMatrix(Camera* cam);
 void setCameraPosition(LALGBR_Vec2d pos, Camera* cam);
 void rotateCamera(float angle, Camera* cam);
 void setCameraFov(float angle, Camera* cam);
-void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures);
+void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int row);
+void drawBackground(RenderContext* context);

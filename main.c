@@ -64,7 +64,7 @@ void loop(double dTime, float time) {
 		movDir.x =+ MOVE_SPEED;
 	else if(keyboardState[SDL_SCANCODE_LEFT])
 		movDir.x =- MOVE_SPEED;
-	
+
 	LALGBR_MulF(&movDir, dTime);	
 	LALGBR_MulMat2x2(&movDir, getCameraRotationMatrix(cam));
 	pos.x += movDir.x;
@@ -88,5 +88,6 @@ void render(SDL_Texture *t, SDL_Renderer *r){
 	cont.target = t;
 	cont.window_height = WINDOW_HEIGHT;
 	cont.window_width = WINDOW_WIDTH;
-	raycast(&cont, cam, textures);
+	drawBackground(&cont);
+	raycast(&cont, cam, textures, 0);
 }
