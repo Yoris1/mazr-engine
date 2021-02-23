@@ -54,44 +54,33 @@ void setCameraFov(float angle, Camera* cam) {
 
 
 #define TILE_SIZE 0.5f
-// Tile is slightly bigger than grid so there wouldn't be any empty columns between them
-char map[10][10] = {
-    {1, 1, 1, 1, 2, 2, 1, 1, 1, 1},
-    {1, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {2, 0, 0, 0, 0, 0, 0, 0, 2, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 2, 2, 2, 1, 1, 1, 1}
-};
 
-float getDist(LALGBR_Vec2d* p, Hit* hit) {
+float getDist(LALGBR_Vec2d* p, Hit* hit, Map* map, int row) {
 	float minDist = RENDER_DIST;
-    
     float a, b, d;
-    for(int x = 0; x < 10; x++) 
-    {
-        for(int y = 0; y < 10; y++) {
-            if(map[x][y] == 0) continue;
-            a = fabsf(p->x - x);
-            b = fabsf(p->y - y);
+	int x, y;
+    for(int i = 0; i < map->tile_count; i++) {
+		if(map->tile_height[i] <= row)
+			continue;
+		
+		x = map->tile_x[i];
+		y = map->tile_y[i];
 
-            if(a > b)
-                d = a;
-            else
-                d = b;
+		a = fabsf(p->x - x);
+		b = fabsf(p->y - y);
 
-            if(minDist > d) {
-                 minDist = d;
-                hit->tile_pos.x = x;
-                hit->tile_pos.y = y;
-                hit->textureId = map[x][y];
-            }
-        }
-    }
+		if(a > b)
+			d = a;
+		else
+			d = b;
+
+		if(minDist > d) {
+			minDist = d;
+			hit->tile_pos.x = x;
+			hit->tile_pos.y = y;
+			hit->textureId = map->tile_texture[i];
+		}
+	};
 	return minDist-TILE_SIZE;
 }
 void calculateHitUVAndFace(Hit* hit) {
@@ -123,7 +112,7 @@ void calculateHitUVAndFace(Hit* hit) {
 #define HIT_DIST 0.0075f
 #define MAX_STEPS 200
 
-int testRay(Ray *ray, Hit *hit) {
+int testRay(Ray *ray, Hit *hit, Map* map, int row) {
 	LALGBR_Vec2d dir;
 	hit->dist = 0;
 	
@@ -138,7 +127,7 @@ int testRay(Ray *ray, Hit *hit) {
 		LALGBR_MulF(&dir, hit->dist);
 		LALGBR_Add(&hit->point, &dir);
 
-		float d = getDist(&hit->point, hit);
+		float d = getDist(&hit->point, hit, map, row);
 
 		if(d < HIT_DIST) {
 			calculateHitUVAndFace(hit);
@@ -152,7 +141,7 @@ int testRay(Ray *ray, Hit *hit) {
 
 SDL_Rect pixel_column_rect;
 
-void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int row) {
+void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int row, Map* map) {
     SDL_SetRenderTarget(context->renderer, context->target);
     Ray ray;
     Hit hit;
@@ -174,8 +163,7 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int ro
 
 		ray.origin = cam->pos;
         
-        map[2][3] = !row;
-		if(testRay(&ray, &hit)) {
+		if(testRay(&ray, &hit, map, row)) {
             float distToCameraPlane = sin(rayAngle)*hit.dist;
 			pixel_column_rect.h = round(context->window_height/distToCameraPlane);
            
@@ -186,8 +174,8 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int ro
             int textureColumn = (hit.textureId-1)%(textures->tiles_x);
             int textureRow = hit.hit_face;
 			
-            //textures->sampleRect.w = 1;
-            //textures->sampleRect.h = textures->tile_height;
+            textures->sampleRect.w = 1;
+            textures->sampleRect.h = textures->tile_height;
 
             textures->sampleRect.x = round(hit.uv*(textures->tile_width-1));
             textures->sampleRect.x += textures->tile_width*textureColumn;
@@ -199,10 +187,6 @@ void raycast(RenderContext* context, Camera* cam, TextureAtlas* textures, int ro
             SDL_SetTextureColorMod(textures->image, brightness*0xff, brightness*0xff, brightness*0xff);
 
 			SDL_RenderCopy(context->renderer, textures->image, &textures->sampleRect, &pixel_column_rect);
-			
-
-			// SDL_SetRenderDrawColor(SDLM_renderer, ray.uv*255*(ray.textureId==2?0:1), ray.uv*255*(ray.textureId==1?0:1), 0, 0x0f);
-			
 		}
 	}
 }

@@ -3,6 +3,7 @@
 #include "raycaster.h"
 #include "sdlm.h"
 #include "texture_atlas.h"
+#include "map.h"
 
 #define MOVE_SPEED 3
 #define WINDOW_WIDTH 640
@@ -20,7 +21,7 @@ void render(SDL_Texture *t, SDL_Renderer *r);
 
 Camera* cam;
 TextureAtlas* textures;
-
+Map* map;
 int main(int argc, char *argv[])
 {
 	keyboardState = SDL_GetKeyboardState(NULL);
@@ -31,8 +32,8 @@ int main(int argc, char *argv[])
 	
 	if(SDLM_SetupWindowWithRenderContext("Mazr", WINDOW_WIDTH, WINDOW_HEIGHT))
 		return 0;	
-	
-	textures = loadAtlas(_SDLM_renderer, "textures/walls_atlas.bmp", 
+	map = loadMap("res/maps/main.bin");
+	textures = loadAtlas(_SDLM_renderer, "res/textures/walls_atlas.bmp", 
 		TEXTURE_WIDTH, TEXTURE_HEIGHT, 2, 1);
 	SDLM_SetTargetFPS(25);
 	SDLM_initGameLoop(&loop, &render);
@@ -91,6 +92,6 @@ void render(SDL_Texture *t, SDL_Renderer *r){
 	cont.window_height = WINDOW_HEIGHT;
 	cont.window_width = WINDOW_WIDTH;
 	drawBackground(&cont);
-	raycast(&cont, cam, textures, 1);
-	raycast(&cont, cam, textures, 0);
+	raycast(&cont, cam, textures, 1, map);
+	raycast(&cont, cam, textures, 0, map);
 }
