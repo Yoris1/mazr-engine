@@ -4,6 +4,9 @@
 
 Map* loadMap(const char* filename) {
 	FILE* map_file = fopen(filename, "r");
+	if(map_file == NULL)
+		 // file doesn't exist
+		return NULL;
 	Map* map = malloc(sizeof(Map));
 
 	map->tile_count = fgetc(map_file);
@@ -14,26 +17,19 @@ Map* loadMap(const char* filename) {
 		free(map); 
 		return NULL;
 	}
-	
-	map->tile_x = malloc(sizeof(char)*map->tile_count);
-	map->tile_y = malloc(sizeof(char)*map->tile_count);
-	map->tile_texture = malloc(sizeof(char)*map->tile_count);
-	map->tile_height = malloc(sizeof(char)*map->tile_count);
+
+	map->tiles = malloc(sizeof(Tile)*map->tile_count);
+	fread(map->tiles, sizeof(Tile), map->tile_count, map_file);
 
 	for(int i = 0; i < map->tile_count; i++) {
-		map->tile_x[i] = fgetc(map_file);
-		map->tile_y[i] = fgetc(map_file);
-		map->tile_texture[i] = fgetc(map_file);
-		map->tile_height[i] = fgetc(map_file);
+		printf("|Loading map tile: %d\n|----> tex: %d, height: %d, x: %d, y:%d \n",
+		i, (int)map->tiles[i].tex_id, (int)map->tiles[i].height, map->tiles[i].x, map->tiles[i].y);
 	}
 	fclose(map_file);
 	return map;
 }
 
 void deleteMap(Map* map) {
-	free(map->tile_texture);
-	free(map->tile_height);
-	free(map->tile_y);
-	free(map->tile_x);
+	free(map->tiles);
 	free(map);
 }

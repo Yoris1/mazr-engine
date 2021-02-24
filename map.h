@@ -1,13 +1,21 @@
 #include "vectors.h"
 typedef struct Map Map;
+typedef struct Tile Tile;
 Map* loadMap(const char* fileName);
-#ifndef CUM
-#define CUM
+
+#ifndef MAP_DEFINED
+#define MAP_DEFINED
 typedef struct Map {
 	int tile_count;
 	int max_height;
-	char *tile_x, *tile_y;
-	char *tile_texture;
-	char *tile_height;
+	Tile* tiles;
 } Map;
+
+typedef struct Tile {
+	int x;
+	int y;
+	char tex_id;
+	char height;
+}Tile;
+
 #endif 

@@ -58,16 +58,14 @@ void setCameraFov(float angle, Camera* cam) {
 float getDist(LALGBR_Vec2d* p, Hit* hit, Map* map, int row) {
 	float minDist = RENDER_DIST;
     float a, b, d;
-	int x, y;
+	Tile t;
     for(int i = 0; i < map->tile_count; i++) {
-		if(map->tile_height[i] <= row)
+		t = map->tiles[i];
+		if(t.height <= row)
 			continue;
-		
-		x = map->tile_x[i];
-		y = map->tile_y[i];
 
-		a = fabsf(p->x - x);
-		b = fabsf(p->y - y);
+		a = fabsf(p->x - t.x);
+		b = fabsf(p->y - t.y);
 
 		if(a > b)
 			d = a;
@@ -76,9 +74,9 @@ float getDist(LALGBR_Vec2d* p, Hit* hit, Map* map, int row) {
 
 		if(minDist > d) {
 			minDist = d;
-			hit->tile_pos.x = x;
-			hit->tile_pos.y = y;
-			hit->textureId = map->tile_texture[i];
+			hit->tile_pos.x = t.x;
+			hit->tile_pos.y = t.y;
+			hit->textureId = t.tex_id;
 		}
 	};
 	return minDist-TILE_SIZE;
